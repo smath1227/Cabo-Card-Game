@@ -1,3 +1,30 @@
+//////////////// FILE HEADER (INCLUDE IN EVERY FILE) //////////////////////////
+//
+// Title:    P05 CABO
+// Course:   CS 300 Fall 2024
+//
+// Author:   Sid Mathur
+// Email:    smathur24@wisc.edu
+// Lecturer: Blerina Gkotse
+//
+//////////////////// PAIR PROGRAMMERS COMPLETE THIS SECTION ///////////////////
+//
+// Partner Name:    Artur Sobol
+// Partner Email:   arsobol@wisc.edu
+// Partner Lecturer's Name: Hobbes LeGault
+//
+// VERIFY THE FOLLOWING BY PLACING AN X NEXT TO EACH TRUE STATEMENT:
+//   _X_ Write-up states that pair programming is allowed for this assignment.
+//   _X_ We have both read and understand the course Pair Programming Policy.
+//   _X_ We have registered our team prior to the team registration deadline.
+//
+//////////////////////// ASSISTANCE/HELP CITATIONS ////////////////////////////
+//
+// Persons:         N/A
+// Online Sources:  N/A
+//
+///////////////////////////////////////////////////////////////////////////////
+
 import java.util.ArrayList;
 import processing.core.PApplet;
 
@@ -10,7 +37,6 @@ public class CaboGame extends PApplet {
   /**
    * Enum representing the different action states in the game
    * (e.g., swapping cards, peeking, spying, switching).
-   * 
    * This allows us to easily restrict the possible values of a variable.
    */
   private enum ActionState {
@@ -211,7 +237,7 @@ public class CaboGame extends PApplet {
     text("Discard Pile:", 644, 60);
 
     for (int i = 0; i < players.length; i++) {
-      text(players[i].getName(), 50, 45 + 150 * i);
+      text(players[i].getName(), 50, 45 + 50 * i);
       players[i].getHand().draw(60 + 150 * i);
     }
 
