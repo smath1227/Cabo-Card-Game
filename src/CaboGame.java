@@ -29,6 +29,8 @@ import java.util.ArrayList;
 
 import processing.core.PApplet;
 
+import javax.smartcardio.Card;
+
 /**
  * The CaboGame class implements the main game logic for the card game CABO. It manages the deck,
  * discard pile, players, game state, and user interactions.
@@ -457,11 +459,31 @@ public class CaboGame extends PApplet {
    */
   public void handleSwitch() {
     // TODO: add CaboGame instance variable to store the index of the card from the currentPlayer's hand
-
     // TODO: check if the player has selected a card from their own hand yet
     // TODO: if they haven't: determine which card in their own hand the mouse is over & store it
     // and do nothing else
-
+    if (selectedCardFromCurrentPlayer != -1){
+      int index = players[currentPlayer].getHand().indexOfMouseOver();
+      selectedCardFromCurrentPlayer = index;
+    } else {
+      for (Player p : players) {
+        if (!p.equals(players[currentPlayer])) {
+          int index = p.getHand().indexOfMouseOver();
+          if (index != -1) {
+            p.getHand().switchCards(selectedCardFromCurrentPlayer, p.getHand(),index);
+            setGameStatus("Switched a card with "+p.getLabel());
+            break;
+          }
+        }
+      }
+      discard.addCard(drawnCard);
+      drawnCard = null;
+      buttons[0].setActive(false);
+      buttons[1].setActive(false);
+      buttons[2].setActive(false);
+      buttons[3].setActive(false);
+      buttons[4].setActive(true);
+    }
     // TODO: if they have selected a card from their own hand already:
     // TODO: find a card from any OTHER player's hand that the mouse is currently over
     // TODO: swap the selected card with the card from the currentPlayer's hand
