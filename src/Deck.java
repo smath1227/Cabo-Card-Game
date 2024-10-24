@@ -71,7 +71,7 @@ public class Deck {
     if (this.cardList.isEmpty()) {
       return null;
     }
-    return cardList.removeLast();
+    return cardList.remove(this.cardList.size() - 1);
   }
 
   /**
@@ -118,7 +118,7 @@ public class Deck {
       return;
     }
 
-    BaseCard topCard = cardList.getLast();
+    BaseCard topCard = cardList.get(this.cardList.size() - 1);
 
     if (isDiscard) {
       topCard.setFaceUp(true);

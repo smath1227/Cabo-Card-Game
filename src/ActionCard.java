@@ -49,6 +49,6 @@ public class ActionCard extends BaseCard {
    * @return the action type as a String: "peek", "spy", or "switch".
    */
   public String getActionType() {
-    return this.actionType;
+    return this.actionType.toUpperCase();
   }
 }

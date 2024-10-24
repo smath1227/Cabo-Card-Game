@@ -134,8 +134,8 @@ public class BaseCard {
   public boolean isMouseOver() {
     return (processing.mouseX <= this.x + WIDTH
         && processing.mouseX >= this.x)
-        && (processing.mouseY <= this.y
-        && processing.mouseY >= this.y - HEIGHT);
+        && (processing.mouseY >= this.y
+        && processing.mouseY <= this.y + HEIGHT);
   }
 }
 

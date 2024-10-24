@@ -56,7 +56,7 @@ public class CaboGame extends PApplet {
   private Player[] players;
   private int caboPlayer;
   private int currentPlayer;
-  Button[] buttons = new Button[5];
+  private Button[] buttons = new Button[5];
   private boolean gameOver;
   private int selectedCardFromCurrentPlayer;
 
@@ -85,9 +85,9 @@ public class CaboGame extends PApplet {
   public void setup() {
     //Set processing
     textFont(createFont("Arial", 16));
-    Deck.processing = this;
-    BaseCard.processing = this;
-    Button.processing = this;
+    Deck.setProcessing(this);
+    BaseCard.setProcessing(this);
+    Button.setProcessing(this);
 
     //creates deck and discard
     this.deck = new Deck(Deck.createDeck());
@@ -207,11 +207,7 @@ public class CaboGame extends PApplet {
     // TODO: otherwise, if no card has been drawn, activate accordingly (see writeup)
     if (drawnCard == null) {
       buttons[0].setActive(true);
-      if (caboPlayer == -1) {
-        buttons[2].setActive(true);
-      } else {
-        buttons[2].setActive(false);
-      }
+      buttons[2].setActive(caboPlayer == -1);
     } else {
       buttons[0].setActive(false);
       buttons[2].setActive(false);
@@ -253,6 +249,22 @@ public class CaboGame extends PApplet {
 
     if (drawnCard != null) {
       drawnCard.draw(500, 500);
+    }
+
+    int y = 200; // Starting y-position for messages
+    for (String message : gameMessages) {
+      textSize(16);
+      if (message.contains("CABO")) {
+        fill(255, 128, 0);
+      } else if (message.contains("switched")) {
+        fill(255, 204, 153);
+      } else if (message.contains("spied")) {
+        fill(255, 229, 204);
+      } else {
+        fill(255);
+      }
+      text(message, width - 300, y); // Adjust x-position as needed
+      y += 20; // Spacing between messages
     }
 
     // TODO: draw the players' hands
@@ -325,7 +337,7 @@ public class CaboGame extends PApplet {
     // TODO: otherwise, draw the next card from the deck
     drawnCard = deck.drawCard();
     // TODO: update the gameMessages log: player.name+" drew a card."
-    setGameStatus(players[currentPlayer].getName() + " drew a card");
+    setGameStatus(players[currentPlayer].getName() + " drew a card.");
     // TODO: update the button states
     updateButtonStates();
   }
@@ -522,7 +534,6 @@ public class CaboGame extends PApplet {
       drawnCard = null;
     }
     // TODO: advance the current player to the next one in the list
-    currentPlayer++;
     if (currentPlayer < players.length - 1) {
       currentPlayer++;
     }
@@ -608,7 +619,7 @@ public class CaboGame extends PApplet {
    * If the drawn card is an action card, the AI player performs the corresponding action.
    * If the AI player's hand value is low enough, they may declare CABO.
    */
-  /*private void performAITurn() {
+  private void performAITurn() {
     AIPlayer aiPlayer = (AIPlayer) players[currentPlayer];
     String gameStatus = aiPlayer.getName() + " is taking their turn.";
     setGameStatus(gameStatus);
@@ -661,7 +672,7 @@ public class CaboGame extends PApplet {
     // Prepare for the next turn
     drawnCard = null;
     nextTurn();
-  }//*/
+  }
 
   /**
    * Performs the specified action for the AI player based on the drawn action card.
@@ -670,7 +681,7 @@ public class CaboGame extends PApplet {
    * @param aiPlayer   the AI player performing the action.
    * @param actionType the type of action to perform ("peek", "spy", or "switch").
    */
-  /*private void performAIAction(AIPlayer aiPlayer, String actionType) {
+  private void performAIAction(AIPlayer aiPlayer, String actionType) {
     Player otherPlayer = players[0]; // Assuming Player 1 is the human player
     String gameStatus = "";
     switch (actionType) {
@@ -712,6 +723,6 @@ public class CaboGame extends PApplet {
         setGameStatus(gameStatus);
       }
     }
-  }//*/
+  }
 
 }
