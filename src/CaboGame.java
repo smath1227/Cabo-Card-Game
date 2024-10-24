@@ -204,21 +204,26 @@ public class CaboGame extends PApplet {
         b.setActive(false);
       }
     }
-    // TODO: otherwise, if no card has been drawn, activate accordingly (see writeup)
-    if (drawnCard == null) {
-      buttons[0].setActive(true);
-      buttons[2].setActive(caboPlayer == -1);
-    } else {
-      buttons[0].setActive(false);
-      buttons[2].setActive(false);
-      buttons[1].setActive(true);
-      buttons[4].setActive(true);
-    }
+    else {
+      if (drawnCard == null) {
+        buttons[0].setActive(true);
+        buttons[2].setActive(caboPlayer == -1);
+      } else {
+        buttons[0].setActive(false);
+        buttons[2].setActive(false);
+        buttons[1].setActive(true);
+        buttons[4].setActive(true);
+        if (drawnCard instanceof ActionCard) {
+          buttons[3].setActive(true);
+          buttons[3].setLabel(((ActionCard) drawnCard).getActionType());
+        }
+      }
 
-    if (drawnCard instanceof ActionCard) {
-      buttons[3].setActive(true);
-      buttons[3].setLabel(((ActionCard) drawnCard).getActionType());
     }
+    // TODO: otherwise, if no card has been drawn, activate accordingly (see writeup)
+
+
+
     // TODO: otherwise, if a card has been drawn, activate accordingly (see writeup)
   }
 
