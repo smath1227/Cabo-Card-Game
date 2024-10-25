@@ -95,8 +95,8 @@ public class CaboGame extends PApplet {
     this.selectedCardFromCurrentPlayer = -1;
 
     //creates and initializes players array
-    players = new Player[] {new Player("Cyntra", 0, false), new Player("Avalon", 1, true),
-        new Player("Balthor", 2, true), new Player("Ophira", 3, true)};
+    players = new Player[] {new Player("Cyntra", 0, false), new AIPlayer("Avalon", 1, true),
+        new AIPlayer("Balthor", 2, true), new AIPlayer("Ophira", 3, true)};
 
     //creates and initializes the button array
     buttons[0] = new Button("Draw from Deck", 50, 700, 150, 40);
@@ -278,6 +278,14 @@ public class CaboGame extends PApplet {
 
     // TODO: if the game is over, display the game over status
     // TODO: handle the computer players' turns
+    if(!gameOver && players[currentPlayer] instanceof AIPlayer) {
+      performAITurn();
+    }
+
+    if(gameOver) {
+      displayGameOver();
+    }
+
   }
 
   /**
@@ -292,37 +300,38 @@ public class CaboGame extends PApplet {
       return;
     }
     // TODO: handle button clicks
-    if (buttons[0].isActive() || buttons[0].isMouseOver()) {
+    if (buttons[0].isActive() && buttons[0].isMouseOver()) {
       drawFromDeck();
-    } else if (buttons[1].isActive() || buttons[1].isMouseOver()) {
+    } else if (buttons[1].isActive() && buttons[1].isMouseOver()) {
       actionState = ActionState.SWAPPING;
       setGameStatus("Click a card in your hand to swap it with the drawn card.");
-    } else if (buttons[2].isActive() || buttons[2].isMouseOver()) {
+    } else if (buttons[2].isActive() && buttons[2].isMouseOver()) {
       declareCabo();
-    } else if (buttons[3].isActive() || buttons[3].isMouseOver()) {
+    } else if (buttons[3].isActive() && buttons[3].isMouseOver()) {
       buttons[3].setLabel("Use Action");
       String actionType = ((ActionCard) drawnCard).getActionType();
-      if (actionType.equals("peek")) {
+      if (actionType.equals("PEEK")) {
         actionState = ActionState.PEEKING;
         setGameStatus("Click a card in your hand to peek at it.");
-      } else if (actionType.equals("spy")) {
+      } else if (actionType.equals("SPY")) {
         actionState = ActionState.SPYING;
         setGameStatus("Click a card in another player's hand to spy on it.");
-      } else if (actionType.equals("swap")) {
-        actionState = ActionState.SWAPPING;
+      } else if (actionType.equals("SWITCH")) {
+        actionState = ActionState.SWITCHING;
         setGameStatus(
-            "Click a card from your hand, then a card from another " + "Kingdom's hand to switch.");
+            "Click a card from your hand, then a card from another Kingdom's hand to switch");
       }
-    } else if (buttons[4].isActive() || buttons[4].isMouseOver()) {
+    } else if (buttons[4].isActive() && buttons[4].isMouseOver()) {
       nextTurn();
     }
-    // handle additional action states (TODO: complete these methods)
-    switch (actionState) {
-      case SWAPPING -> handleCardSwap();
-      case PEEKING -> handlePeek();
-      case SPYING -> handleSpy();
-      case SWITCHING -> handleSwitch();
-      default -> { /* No action to be taken */ }
+    else {
+      switch (actionState) {
+        case SWAPPING -> handleCardSwap();
+        case PEEKING -> handlePeek();
+        case SPYING -> handleSpy();
+        case SWITCHING -> handleSwitch();
+        default -> { /* No action to be taken */ }
+      }
     }
   }
 
@@ -341,6 +350,7 @@ public class CaboGame extends PApplet {
     }
     // TODO: otherwise, draw the next card from the deck
     drawnCard = deck.drawCard();
+    drawnCard.setFaceUp(true);
     // TODO: update the gameMessages log: player.name+" drew a card."
     setGameStatus(players[currentPlayer].getName() + " drew a card.");
     // TODO: update the button states
@@ -373,6 +383,9 @@ public class CaboGame extends PApplet {
   public void handleCardSwap() {
     // TODO: find a card from the current player's hand that the mouse is currently over
     int index = players[currentPlayer].getHand().indexOfMouseOver();
+    if (index == -1) {
+      return;
+    }
     // TODO: swap that card with the drawnCard
     // TODO: add the swapped-out card from the player's hand to the discard pile
     discard.addCard(players[currentPlayer].getHand().swap(drawnCard, index));
@@ -464,7 +477,6 @@ public class CaboGame extends PApplet {
     buttons[4].setActive(true);
   }
 
-
   /**
    * Handles the switch action, allowing the current player to switch one of their cards with a card
    * from another player's hand.
@@ -476,10 +488,11 @@ public class CaboGame extends PApplet {
    */
   public void handleSwitch() {
     // TODO: add CaboGame instance variable to store the index of the card from the currentPlayer's hand
-    // TODO: check if the player has selected a card from their own hand yet
+    // TODO: check if the playefr has selected a card from their own hand yet
     // TODO: if they haven't: determine which card in their own hand the mouse is over & store it
     // and do nothing else
-    if (selectedCardFromCurrentPlayer != -1){
+    System.out.println("Switch");
+    if (selectedCardFromCurrentPlayer == -1){
       int index = players[currentPlayer].getHand().indexOfMouseOver();
       selectedCardFromCurrentPlayer = index;
     } else {
@@ -488,13 +501,15 @@ public class CaboGame extends PApplet {
           int index = p.getHand().indexOfMouseOver();
           if (index != -1) {
             p.getHand().switchCards(selectedCardFromCurrentPlayer, p.getHand(),index);
-            setGameStatus("Switched a card with "+p.getLabel());
+            setGameStatus("Switched a card with "+ p.getName());
             break;
           }
         }
       }
       discard.addCard(drawnCard);
       drawnCard = null;
+      actionState = ActionState.NONE;
+
       buttons[0].setActive(false);
       buttons[1].setActive(false);
       buttons[2].setActive(false);
@@ -555,11 +570,7 @@ public class CaboGame extends PApplet {
     // TODO: reset the action state to NONE
     actionState = ActionState.NONE;
     // TODO: update the button states
-    buttons[0].setActive(false);
-    buttons[1].setActive(false);
-    buttons[2].setActive(false);
-    buttons[3].setActive(false);
-    buttons[4].setActive(true);
+    updateButtonStates();
   }
 
   /**
@@ -576,25 +587,34 @@ public class CaboGame extends PApplet {
     fill(255);
     textSize(32);
     textAlign(CENTER, CENTER);
-    text("Game Over!", (float) width / 2, (float) height / 2 - 150);
+    text("Game Over!", (float) width / 2, (float) height / 2 + 150);
 
     // TODO: reveal all players' cards
+    for (Player p : players) {
+      for (int i = 0; i < p.getHand().size(); i++)  {
+        p.getHand().setFaceUp(i, true);
+      }
+    }
 
     // TODO: calculate and display each player's score
     int yPosition = height / 2 - 100;
     textSize(24);
     // TODO: uncomment to Display a player's score
-    //text(player.getName() + "'s score: " + score, (float) width / 2, yPosition);
-    yPosition += 30;
+    for (Player p : players) {
+      text(p.getName() + "'s score: " + p.getHand().calcHand(), (float) width / 2, yPosition);
+      yPosition += 30;
+    }
 
     // TODO: check if there is a tie or a specific CABO winner (lowest score wins)
-    String winner = null;
+    if (caboPlayer == -1) {
+      String winner = null;
+      text("No Winner. The war starts.", (float) width / 2, yPosition + 30);
 
-    // TODO: display this message if there is no winner
-    text("No Winner. The war starts.", (float) width / 2, yPosition + 30);
-
-    // TODO: display this message if there is a winner
-    text("Winner: " + winner, (float) width / 2, yPosition + 30);
+    }
+    else {
+      String winner = players[caboPlayer].getName();
+      text("Winner: " + winner, (float) width / 2, yPosition + 30);
+    }
   }
 
   /**
